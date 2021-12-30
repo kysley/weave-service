@@ -1,4 +1,5 @@
 import Fastify, { FastifyRequest } from "fastify";
+import FastifyCors from "fastify-cors";
 
 import { generatorFactory } from "./utils";
 
@@ -7,8 +8,13 @@ type TLookupObject = {
 };
 
 const LOOKUP = new Map<string, TLookupObject>();
+LOOKUP.set("ABCD", { peerId: "test" });
 
 const fastify = Fastify();
+
+fastify.register(FastifyCors, {
+  origin: ["http://localhost:3000", "http://weave.e8y.fun"],
+});
 
 const generator = generatorFactory();
 
@@ -18,20 +24,21 @@ type PeerManagerPostRequest = FastifyRequest<{
   };
 }>;
 fastify.post("/peermanager", async (req: PeerManagerPostRequest, res) => {
-  res.statusCode = 400;
-
   const { peerId } = req.body;
-  if (!peerId) return;
+  if (!peerId) return res.status(400).send();
 
   let uniqueCodeFound = false;
+  let code;
   while (uniqueCodeFound === false) {
     const newCode = generator.generate();
+    console.log(newCode);
     if (!LOOKUP.has(newCode)) {
-      uniqueCodeFound = false;
+      uniqueCodeFound = true;
+      code = newCode;
       LOOKUP.set(newCode, { peerId });
     }
   }
-  res.statusCode = 200;
+  return res.status(200).send({ code });
 });
 
 type PeerManagerDeleteRequest = FastifyRequest<{
@@ -41,35 +48,30 @@ type PeerManagerDeleteRequest = FastifyRequest<{
   };
 }>;
 fastify.delete("/peermanager", async (req: PeerManagerDeleteRequest, res) => {
-  res.statusCode = 404; // hehe
-
   const { peerId, code } = req.body;
-  if (!peerId || !code) return; // idc
+  if (!peerId || !code) return res.status(404).send(); // idc
 
   const weaveSession = LOOKUP.get(code);
-  if (!weaveSession) return; // idc again
+  if (!weaveSession) return res.status(404).send(); // idc again
 
-  if (weaveSession.peerId !== peerId) return; // still don't care
+  if (weaveSession.peerId !== peerId) return res.status(404).send(); // still don't care
 
   LOOKUP.delete(code);
-  res.statusCode = 200;
+  res.status(200).send();
 });
 
 type PeerManagerGetRequest = FastifyRequest<{
-  Body: {
+  Querystring: {
     code: string;
   };
 }>;
 fastify.get("/peermanager", async (req: PeerManagerGetRequest, res) => {
-  res.statusCode = 400;
-
-  const { code = "20" } = req.body;
-  if (!code) return;
+  const { code } = req.query;
+  if (!code) return res.status(404).send();
 
   const weaveSession = LOOKUP.get(code);
-  if (!weaveSession) return;
+  if (!weaveSession) return res.status(404).send();
 
-  res.statusCode = 200;
   return {
     peerId: weaveSession.peerId,
   };
