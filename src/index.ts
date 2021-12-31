@@ -23,7 +23,7 @@ type PeerManagerPostRequest = FastifyRequest<{
     peerId: string;
   };
 }>;
-fastify.post("/peermanager", async (req: PeerManagerPostRequest, res) => {
+fastify.post("/", async (req: PeerManagerPostRequest, res) => {
   const { peerId } = req.body;
   if (!peerId) return res.status(400).send();
 
@@ -47,7 +47,7 @@ type PeerManagerDeleteRequest = FastifyRequest<{
     code: string;
   };
 }>;
-fastify.delete("/peermanager", async (req: PeerManagerDeleteRequest, res) => {
+fastify.delete("/", async (req: PeerManagerDeleteRequest, res) => {
   const { peerId, code } = req.body;
   if (!peerId || !code) return res.status(404).send(); // idc
 
@@ -65,7 +65,7 @@ type PeerManagerGetRequest = FastifyRequest<{
     code: string;
   };
 }>;
-fastify.get("/peermanager", async (req: PeerManagerGetRequest, res) => {
+fastify.get("/", async (req: PeerManagerGetRequest, res) => {
   const { code } = req.query;
   if (!code) return res.status(404).send();
 
