@@ -79,7 +79,7 @@ fastify.get("/", async (req: PeerManagerGetRequest, res) => {
 
 const start = async () => {
   try {
-    await fastify.listen(3001);
+    await fastify.listen(3600);
   } catch (e) {
     console.error(e);
     process.exit(1);
