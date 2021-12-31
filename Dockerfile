@@ -15,5 +15,5 @@ COPY ./package.json .
 COPY ./yarn.lock .
 RUN yarn --production
 COPY --from=builder /app/dist ./dist
-EXPOSE 3001
+EXPOSE 3600
 CMD ["node", "./dist/index.js"]
