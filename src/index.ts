@@ -13,7 +13,7 @@ LOOKUP.set("ABCD", { peerId: "test" });
 const fastify = Fastify();
 
 fastify.register(FastifyCors, {
-  origin: ["http://localhost:3000", "http://weave.e8y.fun"],
+  origin: ["http://localhost:3000", "https://weave.e8y.fun"],
 });
 
 const generator = generatorFactory();
