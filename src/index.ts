@@ -5,12 +5,13 @@ import { generatorFactory } from "./utils";
 
 type TLookupObject = {
   peerId: string;
+  peerIp: string;
 };
 
 const LOOKUP = new Map<string, TLookupObject>();
-LOOKUP.set("ABCD", { peerId: "test" });
+LOOKUP.set("ABCD", { peerId: "test", peerIp: "no.ip" });
 
-const fastify = Fastify();
+const fastify = Fastify({ trustProxy: true });
 
 fastify.register(FastifyCors, {
   origin: ["http://localhost:3000", "https://weave.e8y.fun"],
@@ -24,6 +25,7 @@ type PeerManagerPostRequest = FastifyRequest<{
   };
 }>;
 fastify.post("/", async (req: PeerManagerPostRequest, res) => {
+  console.log(req.ip);
   const { peerId } = req.body;
   if (!peerId) return res.status(400).send();
 
@@ -35,7 +37,7 @@ fastify.post("/", async (req: PeerManagerPostRequest, res) => {
     if (!LOOKUP.has(newCode)) {
       uniqueCodeFound = true;
       code = newCode;
-      LOOKUP.set(newCode, { peerId });
+      LOOKUP.set(newCode, { peerId, peerIp: req.ip });
     }
   }
   return res.status(200).send({ code });
